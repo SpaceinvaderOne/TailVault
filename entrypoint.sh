@@ -1,15 +1,21 @@
 #!/bin/sh
 
 if [ -z "$SFTP_USER" ] || [ -z "$SFTP_PASS" ]; then
-  echo "Error: SFTP_USER and SFTP_PASS must be set as environment variables in container template."
+  echo "Error: SFTP_USER and SFTP_PASS must be set as environment variables."
   exit 1
 fi
 
-# add the user in  /conf 
+if [ ! -f /config/ssh_host_rsa_key ]; then
+  echo "Generating SSH host keys..."
+  ssh-keygen -A
+  cp /etc/ssh/ssh_host_* /config/
+else
+  echo "Using existing SSH host keys..."
+  cp /config/ssh_host_* /etc/ssh/
+fi
+
 adduser -D -h /conf "$SFTP_USER"
 
-# set password
 echo "$SFTP_USER:$SFTP_PASS" | chpasswd
 
-# start ssh
 /usr/sbin/sshd -D
