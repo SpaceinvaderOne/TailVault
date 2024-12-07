@@ -1,4 +1,7 @@
 FROM alpine:latest
 
-# Keep the container running
-CMD ["tail", "-f", "/dev/null"]
+RUN apk add --no-cache openssh
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+EXPOSE 22
+ENTRYPOINT ["/entrypoint.sh"]
